@@ -2,8 +2,8 @@
 {
     internal class RateLimitList
     {
-        private readonly int _maxRequests;
-        private readonly int _rateLimitTimeFrameSeconds;
+        private int _maxRequests;
+        private int _rateLimitTimeFrameSeconds;
         private readonly List<DateTime> _list;
 
         public RateLimitList(int maxRequests, int rateLimitTimeFrameSeconds) 
@@ -22,6 +22,16 @@
         public bool IsRateLimitExceeded()
         {
             return _list.Count(x => DateTime.UtcNow.Subtract(x).TotalSeconds <= _rateLimitTimeFrameSeconds) >= _maxRequests;
+        }
+
+        public void SetMaxRequests(int maxRequests)
+        {
+            _maxRequests = maxRequests;
+        }
+
+        public void SetTimeFrameSeconds(int timeFrameSeconds)
+        {
+            _rateLimitTimeFrameSeconds = timeFrameSeconds;
         }
     }
 }

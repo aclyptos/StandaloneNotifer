@@ -17,7 +17,7 @@ namespace StandaloneNotifier
 
         internal static readonly Random random = new Random();
         internal static DateTime RateLimitEnd = DateTime.MinValue;
-        private static RateLimitList _rateLimitHandler = new RateLimitList(118, 60);
+        private static RateLimitList _rateLimitHandler = new RateLimitList(15, 60);
         private static readonly Dictionary<string, (DateTime, Yoinker?)> yoinkerCheckCache = new Dictionary<string, (DateTime, Yoinker?)>();
         private static readonly IPCClient ipcClient = new IPCClient();
         private static readonly IPCClientReceive ipcClientRec = new IPCClientReceive();
@@ -66,11 +66,32 @@ namespace StandaloneNotifier
             {
                 File.Delete("update");
             }
+
+            Thread rateLimitUpdateThread = new Thread(() =>
+            {
+                while (true)
+                {
+                    int rateLimit = 15; // fallback value in case web request fails
+                    try
+                    {
+                        HttpResponseMessage? rateLimitResponse = Extensions.HttpClientExtensions.GetAsync("https://yd.just-h.party/downloads/standalonenotifier/rate_limit").GetAwaiter().GetResult();
+                        if (rateLimitResponse != null && rateLimitResponse.IsSuccessStatusCode)
+                        {
+                            var rateLimitText = rateLimitResponse.Content.ReadAsStringAsync().GetAwaiter().GetResult();
+                            int.TryParse(rateLimitText, out rateLimit);
+                        }
+                    } catch { }
+                    _rateLimitHandler.SetRateLimit(rateLimit);
+                    Thread.Sleep(10000);
+                }
+            });
+            rateLimitUpdateThread.Start();
+
 #if !DEBUG
 
             try
             {
-                HttpResponseMessage? response = Extensions.HttpClientExtensions.GetAsync("https://yd.just-h.party/downloads/standalonenotifier/version", true).GetAwaiter().GetResult();
+                HttpResponseMessage? response = Extensions.HttpClientExtensions.GetAsync("https://yd.just-h.party/downloads/standalonenotifier/version").GetAwaiter().GetResult();
                 if (response != null)
                 {
                     var resp = response.Content.ReadAsStringAsync().GetAwaiter().GetResult();
