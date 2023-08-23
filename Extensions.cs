@@ -22,6 +22,7 @@ namespace StandaloneNotifier
                 {
                     using (HttpClientHandler httpClientHandler = new HttpClientHandler())
                     {
+                        httpClientHandler.AutomaticDecompression = DecompressionMethods.All;
                         using (HttpClient httpClient = new HttpClient(httpClientHandler))
                         {
                             httpClient.DefaultRequestHeaders.TryAddWithoutValidation("User-Agent", 
