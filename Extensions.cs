@@ -33,7 +33,7 @@ namespace StandaloneNotifier
                 }
                 catch (Exception ex)
                 {
-                    System.Console.WriteLine("There was an error while getting a response from the server.");
+                    System.Console.WriteLine("\0There was an error while getting a response from the server.");
                 }
                 return null;
             }

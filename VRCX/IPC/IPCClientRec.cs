@@ -44,7 +44,7 @@ namespace StandaloneNotifier.VRCX.IPC
                     BeginRead();
 
                     _connectThread = null;
-                    Console.WriteLine("Receiver connected to VRCX IPC server.");
+                    Console.WriteLine("\0Receiver connected to VRCX IPC server.");
                     break;
                 }
                 catch (Exception e)

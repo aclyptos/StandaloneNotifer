@@ -144,7 +144,7 @@ namespace StandaloneNotifier.VRCX.IPC
             }
             catch (Exception e)
             {
-                Console.WriteLine("Lost connection to the VRCX IPC Server. Reconnecting...");
+                Console.WriteLine("\0Lost connection to the VRCX IPC Server. Reconnecting...");
                 Connect();
             }
         }

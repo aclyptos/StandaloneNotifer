@@ -44,7 +44,7 @@ namespace StandaloneNotifier
             }
             else
             {
-                Console.WriteLine("Do you want automatic updates? Y/N");
+                Console.WriteLine("\0Do you want automatic updates? Y/N");
                 string input = Console.ReadLine().ToLower();
                 if (input == "y" ||
                     input == "yes")
@@ -105,12 +105,12 @@ namespace StandaloneNotifier
                     if (respVersion != Version)
                     {
                     string msg2 = 
-                    "A different version is available. Installed -> " +
+                    "\0A different version is available. Installed -> " +
                     Version +
                     " | Available -> " +
                     resp +
                     "\n" +
-                    "Check https://yd.just-h.party/ for the download URL.";
+                    "\0Check https://yd.just-h.party/ for the download URL.";
                         Console.WriteLine(msg2);
 
                         if (_autoUpdate)
@@ -124,14 +124,14 @@ namespace StandaloneNotifier
                             {
                                 webClient.Headers.Add("User-Agent",
                                     "StandaloneNotifier V" + Version);
-                                Console.WriteLine("Downloading update... Please don't close the application!");
+                                Console.WriteLine("\0Downloading update... Please don't close the application!");
 
                                 webClient.DownloadFile(downloadUrl,
                                     "update");
                             }
                             File.Move(fileName, fileName + ".old", true);
                             File.Move("update", fileName, true);
-                            Console.WriteLine("Update finished... Restarting!");
+                            Console.WriteLine("\0Update finished... Restarting!");
                             var process = new Process
                             {
                                 StartInfo = new ProcessStartInfo
@@ -183,9 +183,6 @@ namespace StandaloneNotifier
                                 ". (detection year: " +
                                 yoinker.Year +
                                 ")";
-                            Console.ForegroundColor = ConsoleColor.DarkRed;
-                            Console.WriteLine(msg);
-                            Console.ForegroundColor = ConsoleColor.White;
                             if (ipcClient == null || !ipcClient.Connected) Extensions.Console.Beep();
                             else
                             {
@@ -194,10 +191,14 @@ namespace StandaloneNotifier
                                     "#ff0000");
                                 if (userId == null) ipcClient.SendMessage(msg, yoinker.UserId, yoinker.UserName);
                             }
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            msg = "\0" + msg;
+                            Console.WriteLine(msg);
+                            Console.ForegroundColor = ConsoleColor.White;
                         }
                         else
                         {
-                            string msg = "User " +
+                            string msg = "\0User " +
                             search +
                             " was not found in any yoinker list.";
                             Console.WriteLine(msg);
@@ -217,7 +218,7 @@ namespace StandaloneNotifier
                     if (response.StatusCode == HttpStatusCode.TooManyRequests)
                     {
                         if (DateTime.Now > RateLimitEnd) RateLimitEnd = DateTime.Now.AddHours(1);
-                        string msg = "You are being RATE LIMITED " +
+                        string msg = "\0You are being RATE LIMITED " +
                             RateLimitEnd.Subtract(DateTime.Now).ToString("HH:mm:ss") +
                             " until your requests will be served again.";
                         Console.WriteLine(msg);
@@ -226,7 +227,7 @@ namespace StandaloneNotifier
                     if (response.StatusCode == HttpStatusCode.NotFound)
                     {
                         yoinkerCheckCache.Add(search, (DateTime.UtcNow, null));
-                        string msg = "User " +
+                        string msg = "\0User " +
                             search +
                             " was not found in any yoinker list.";
                         Console.WriteLine(msg);
@@ -241,7 +242,7 @@ namespace StandaloneNotifier
 
                     if (response.StatusCode != HttpStatusCode.OK)
                     {
-                        Console.WriteLine("There was an error while receiving the response");
+                        Console.WriteLine("\0There was an error while receiving the response");
                         return;
                     }
 
@@ -255,7 +256,6 @@ namespace StandaloneNotifier
                     if (yoinker.IsYoinker)
                     {
                         yoinkerCheckCache.Add(search, (DateTime.UtcNow, yoinker));
-                        Console.ForegroundColor = ConsoleColor.DarkRed;
                         string msg = "User " +
                             yoinker.UserName +
                             " has been found " +
@@ -263,8 +263,6 @@ namespace StandaloneNotifier
                             ". (detection year: " +
                                 yoinker.Year +
                                 ")";
-                        Console.WriteLine(msg);
-                        Console.ForegroundColor = ConsoleColor.White;
                         if (ipcClient == null || !ipcClient.Connected) Extensions.Console.Beep();
                         else
                         {
@@ -273,11 +271,15 @@ namespace StandaloneNotifier
                                 "#ff0000");
                             if(userId == null) ipcClient.SendMessage(msg, yoinker.UserId, yoinker.UserName);
                         }
+                        Console.ForegroundColor = ConsoleColor.DarkRed;
+                        msg = "\0" + msg;
+                        Console.WriteLine(msg);
+                        Console.ForegroundColor = ConsoleColor.White;
                     }
                     else
                     {
                         yoinkerCheckCache.Add(search, (DateTime.UtcNow, null));
-                        string msg = "User " +
+                        string msg = "\0User " +
                             search +
                             " was not found in any yoinker list.";
                         Console.WriteLine(msg);
@@ -285,7 +287,7 @@ namespace StandaloneNotifier
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("There was an error while receiving the response!");
+                    Console.WriteLine("\0There was an error while receiving the response!");
                 }
                 finally
                 {
