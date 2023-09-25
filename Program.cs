@@ -11,7 +11,7 @@ namespace StandaloneNotifier
 {
     internal class Program
     {
-        internal static double Version = 24;
+        internal static double Version = 26;
 
         internal static readonly object _lock = new object();
 
@@ -22,6 +22,7 @@ namespace StandaloneNotifier
         private static readonly IPCClient ipcClient = new IPCClient();
         private static readonly IPCClientReceive ipcClientRec = new IPCClientReceive();
         private static bool _autoUpdate = false;
+        private static bool _beepWithVrcx = false;
 
         private static void LoadConfigVars()
         {
@@ -32,14 +33,32 @@ namespace StandaloneNotifier
                 ;
             if (File.Exists(configPath))
             {
+                HashSet<string> settingsInConfig = new HashSet<string>();
                 foreach (var ln in File.ReadAllLines(configPath))
                 {
+                    if (!ln.Contains(configVariableSeperator)) continue;
                     string[] parts = ln.Split(configVariableSeperator[0]);
                     string id = parts[0].ToLower();
+                    settingsInConfig.Add(id);
                     if (id == "autoupdate")
                     {
                         if (bool.TryParse(parts[1], out bool res)) _autoUpdate = res;
                     }
+                    else if(id == "beepwithvrcx")
+                    {
+                        if (bool.TryParse(parts[1], out bool res)) _autoUpdate = res;
+                    }
+                }
+                if (!settingsInConfig.Contains("beepwithvrcx"))
+                {
+                    Console.WriteLine("\0Do you want to get a beep even with VRCX connected? Y/N");
+                    string input = Console.ReadLine().ToLower();
+                    if (input == "y" ||
+                        input == "yes")
+                        _beepWithVrcx = true;
+                    File.AppendAllText(configPath, Environment.NewLine +
+                    "BeepWithVrcx:" +
+                    _beepWithVrcx);
                 }
             }
             else
@@ -50,9 +69,17 @@ namespace StandaloneNotifier
                     input == "yes")
                     _autoUpdate = true;
 
+                Console.WriteLine("\0Do you want to get a beep even with VRCX connected? Y/N");
+                input = Console.ReadLine().ToLower();
+                if (input == "y" ||
+                    input == "yes")
+                    _beepWithVrcx = true;
+
                 File.WriteAllText(configPath,
                     "AutoUpdate:" +
-                    _autoUpdate);
+                    _autoUpdate + Environment.NewLine +
+                    "BeepWithVrcx:" +
+                    _beepWithVrcx);
             }
         }
 
@@ -183,8 +210,8 @@ namespace StandaloneNotifier
                                 ". (detection year: " +
                                 yoinker.Year +
                                 ")";
-                            if (ipcClient == null || !ipcClient.Connected) Extensions.Console.Beep();
-                            else
+                            if (ipcClient == null || !ipcClient.Connected || _beepWithVrcx) Extensions.Console.Beep();
+                            if (ipcClient != null && ipcClient.Connected)
                             {
                                 ipcClient.SetCustomTag(userId,
                                     "Yoinker",
@@ -263,8 +290,8 @@ namespace StandaloneNotifier
                             ". (detection year: " +
                                 yoinker.Year +
                                 ")";
-                        if (ipcClient == null || !ipcClient.Connected) Extensions.Console.Beep();
-                        else
+                        if (ipcClient == null || !ipcClient.Connected || _beepWithVrcx) Extensions.Console.Beep();
+                        if (ipcClient != null && ipcClient.Connected)
                         {
                            ipcClient.SetCustomTag(userId,
                                 "Yoinker",
